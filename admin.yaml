@@ -4,7 +4,7 @@ metadata:
   name: k8s-admin
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: k8s-admin
 rules:
@@ -19,7 +19,7 @@ rules:
       - create
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: k8s-admin
 roleRef:
@@ -38,5 +38,5 @@ metadata:
 spec:
   serviceAccountName: k8s-admin
   containers:
-  - image: nabsul/k8s-admin:v002
+  - image: nabsul/k8s-admin:v003
     name: kube
