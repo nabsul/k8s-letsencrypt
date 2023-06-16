@@ -58,37 +58,44 @@ You'll need to route requests to the `/.well-known/acme-challenge` path to the `
 To do this, go to your Ingress definition and add the following as the first entry in your `paths` section:
 
 ```yaml
-      - path: /.well-known/acme-challenge
+      - backend:
+          service:
+            name: acme-challenge
+            port:
+              number: 80
+        path: /.well-known/acme-challenge
         pathType: Prefix
-        backend:
-          serviceName: acme-challenge
-          servicePort: 80
 ```
 
 For example, your complete ingress file should look like this:
 
 ```yaml
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: tet-ingress
+  name: test-ingress
 spec:
-  tls:
-  - hosts:
-    - mytest.test
-    secretName: test-tls
+  ingressClassName: nginx
   rules:
   - host: mytest.test
     http:
       paths:
-      - path: /.well-known/acme-challenge
-        pathType: Prefix
-        backend:
-          serviceName: acme-challenge
-          servicePort: 80
       - backend:
-          serviceName: hello-world
-          servicePort: 80
+          service:
+            name: acme-challenge
+            port:
+              number: 80
+        path: /.well-known/acme-challenge
+        pathType: Prefix
+      - backend:
+          service:
+            name: hello-world
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - mytest.test
+    secretName: test-tls
 ```
 
 ### Step 4: Run CertBot
@@ -103,7 +110,7 @@ You should now see the Debian bash prompt of the admin pod.
 You can now start the process of issuing the certificate with the following command:
 
 ```sh
-certbot certonly --manual --preferred-challenges http -d [mydomain.com]
+certbot certonly --manual --preferred-challenges http -d [mydomain.com],[mydomain.org],[mydomain.net]
 ```
 
 You will have to provide your email address and agree to some terms.
@@ -133,16 +140,14 @@ We'll now navigate to the html content directory and create a couple of empty di
 
 ```sh
 cd /usr/share/nginx/html/
-mkdir .well-known
-cd .well-known
-mkdir acme-challenge
-cd acme-challenge
+mkdir -p .well-known/acme-challenge
+cd .well-known/acme-challenge
 ```
 
 Finally, we'll create the file that was requested in the previous step. For example:
 
 ```sh
-echo 2RzV_b85lAE2wPn_Nf-UJzdVkxPjxgw8_6oEtPpV6ls.ABCABC_1dedKwm_TsyyDkbIsd76jnfrn5a_XrwkPkHU > ABSABV_b85lAE2wPn_Nf-UJzdVkxPjxgw8_6oEtPpV6ls
+echo "2RzV_b85lAE2wPn_Nf-UJzdVkxPjxgw8_6oEtPpV6ls.ABCABC_1dedKwm_TsyyDkbIsd76jnfrn5a_XrwkPkHU" > ABSABV_b85lAE2wPn_Nf-UJzdVkxPjxgw8_6oEtPpV6ls
 ```
 
 ### Step 6: Create a Kubernetes Secret
